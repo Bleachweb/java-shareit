@@ -38,7 +38,6 @@ public class ItemServiceImpl implements ItemService {
         return ItemMapper.itemToDto(createdItem);
     }
 
-
     @Override
     public ItemDto updateItem(int userId, int itemId, ItemDto itemDto) {
 
