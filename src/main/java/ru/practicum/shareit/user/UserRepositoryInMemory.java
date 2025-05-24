@@ -9,7 +9,7 @@ import java.util.*;
 
 @Slf4j
 @Repository
-public class UserRepositoryImpl implements UserRepository {
+public class UserRepositoryInMemory implements UserRepository {
 
     private Integer userId = 0;
     private final Map<Integer, User> users = new HashMap<>();
@@ -19,7 +19,7 @@ public class UserRepositoryImpl implements UserRepository {
     public User addUser(User user) {
         final String email = user.getEmail();
         if (usersEmail.contains(email)) {
-            log.error("Пользователь с email {} уже существует", email);
+            log.warn("Пользователь с email {} уже существует", email);
             throw new DataDuplicationException("Пользователь с email " + email + " уже существует");
         }
         int id = getId();
@@ -35,7 +35,7 @@ public class UserRepositoryImpl implements UserRepository {
         users.computeIfPresent(user.getId(), (id, u) -> {
             if (!email.equals(u.getEmail())) {
                 if (usersEmail.contains(email)) {
-                    log.error("Невозможно изменить email на {}, так как он уже существует", email);
+                    log.warn("Невозможно изменить email на {}, так как он уже существует", email);
                     throw new DataDuplicationException("Невозможно изменить email на " + email + ", так как он уже существует");
                 }
                 usersEmail.remove(u.getEmail());

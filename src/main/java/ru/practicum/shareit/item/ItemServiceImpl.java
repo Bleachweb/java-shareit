@@ -85,7 +85,7 @@ public class ItemServiceImpl implements ItemService {
         if (text.isBlank()) {
             return new ArrayList<>();
         }
-        return ItemMapper.itemsToDto(itemRepository.searchItems(userId, text.toLowerCase()));
+        return ItemMapper.itemsToDto(itemRepository.searchItems(userId, text));
     }
 
     private Integer getId() {

@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Repository
-public class ItemRepositoryImpl implements ItemRepository {
+public class ItemRepositoryInMemory implements ItemRepository {
 
     private final Map<Integer, Item> items = new HashMap<>();
 
@@ -40,8 +40,8 @@ public class ItemRepositoryImpl implements ItemRepository {
         return items.values()
                 .stream()
                 .filter(Item::isAvailable)
-                .filter(item -> item.getName().toLowerCase().contains(text)
-                        || item.getDescription().toLowerCase().contains(text))
+                .filter(item -> item.getName().toLowerCase().contains(text.toLowerCase())
+                        || item.getDescription().toLowerCase().contains(text.toLowerCase()))
                 .toList();
     }
 }

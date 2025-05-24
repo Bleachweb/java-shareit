@@ -15,47 +15,46 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/items")
 public class ItemController {
+    public static final String X_SHARER_USER_ID = "X-Sharer-User-Id";
 
     private final ItemService itemService;
 
     @PostMapping
-    public ItemDto createItem(@RequestHeader("X-Sharer-User-Id") int userId,
+    public ItemDto createItem(@RequestHeader(X_SHARER_USER_ID) int userId,
                               @Valid @RequestBody ItemDto itemDto) {
-        log.info("Добавляем новую вещь: {}", itemDto);
         ItemDto createdItemDto = itemService.createItem(userId, itemDto);
-        log.info("Новая вещь добавлена: {}", createdItemDto);
+        log.info("Добавлена новая вещь: {}", createdItemDto);
         return createdItemDto;
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto updateItem(@RequestHeader("X-Sharer-User-Id") int userId,
+    public ItemDto updateItem(@RequestHeader(X_SHARER_USER_ID) int userId,
                               @PathVariable int itemId,
                               @RequestBody ItemDto itemDto) {
-        log.info("Обновляем вещь: {}", itemDto);
+        log.info("Обновляем вещь с id: {}", itemId);
         ItemDto updatingItemDto = itemService.updateItem(userId, itemId, itemDto);
         log.info("Обновленная вещь: {}", updatingItemDto);
         return updatingItemDto;
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemById(@RequestHeader("X-Sharer-User-Id") int userId,
+    public ItemDto getItemById(@RequestHeader(X_SHARER_USER_ID) int userId,
                                @PathVariable int itemId) {
         log.info("Получаем вещь по id: {}", itemId);
         ItemDto gettingItemDto = itemService.getItemById(userId, itemId);
-        log.info("Получена вещь с id: {}", gettingItemDto);
+        log.info("Получена вещь: {}", gettingItemDto);
         return gettingItemDto;
     }
 
     @GetMapping
-    public List<ItemDto> getAllItems(@RequestHeader("X-Sharer-User-Id") int userId) {
+    public List<ItemDto> getAllItems(@RequestHeader(X_SHARER_USER_ID) int userId) {
         log.info("Получаем все вещи");
         List<ItemDto> allItemsDto = itemService.getItems(userId);
-        log.info("Все вещи получены");
         return allItemsDto;
     }
 
     @GetMapping("/search")
-    public List<ItemDto> searchItems(@RequestHeader("X-Sharer-User-Id") int userId,
+    public List<ItemDto> searchItems(@RequestHeader(X_SHARER_USER_ID) int userId,
                                      @RequestParam String text) {
         log.info("Поиск вещи по тексту {}", text);
         List<ItemDto> searchItems = itemService.searchItems(userId, text);

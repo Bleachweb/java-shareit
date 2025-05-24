@@ -19,7 +19,6 @@ public class UserController {
 
     @PostMapping
     public UserDto createUser(@RequestBody @Valid UserDto userDto) {
-        log.info("Добавление нового пользователя: {}", userDto);
         UserDto createdUserDto = userService.createUser(userDto);
         log.info("Добавлен новый пользователь: {}", createdUserDto);
         return createdUserDto;
@@ -28,7 +27,7 @@ public class UserController {
     @PatchMapping("/{userId}")
     public UserDto updateUser(@PathVariable int userId,
                               @RequestBody UserDto userDto) {
-        log.info("Обновление пользователя: {}", userDto);
+        log.info("Обновление пользователя с id: {}", userId);
         UserDto updatingUserDto = userService.updateUser(userId, userDto);
         log.info("Обновленный пользователь: {}", updatingUserDto);
         return updatingUserDto;
@@ -44,7 +43,6 @@ public class UserController {
 
     @GetMapping
     public List<UserDto> getAllUsers() {
-        log.info("Получаем всех пользователей");
         List<UserDto> allUsersDto = userService.getUsers();
         log.info("Список всех пользователей: {}", allUsersDto);
         return allUsersDto;
@@ -52,7 +50,6 @@ public class UserController {
 
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable int userId) {
-        log.info("Удаление пользователя с id: {}", userId);
         userService.deleteUser(userId);
         log.info("Удален пользователь с id: {}", userId);
     }
