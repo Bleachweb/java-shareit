@@ -31,8 +31,8 @@ public class ItemController {
     public ItemDto updateItem(@RequestHeader(X_SHARER_USER_ID) int userId,
                               @PathVariable int itemId,
                               @RequestBody ItemDto itemDto) {
-        log.info("Обновляем вещь с id: {}", itemId);
-        ItemDto updatingItemDto = itemService.updateItem(userId, itemId, itemDto);
+        itemDto.setId(itemId);
+        ItemDto updatingItemDto = itemService.updateItem(userId, itemDto);
         log.info("Обновленная вещь: {}", updatingItemDto);
         return updatingItemDto;
     }
@@ -40,7 +40,6 @@ public class ItemController {
     @GetMapping("/{itemId}")
     public ItemDto getItemById(@RequestHeader(X_SHARER_USER_ID) int userId,
                                @PathVariable int itemId) {
-        log.info("Получаем вещь по id: {}", itemId);
         ItemDto gettingItemDto = itemService.getItemById(userId, itemId);
         log.info("Получена вещь: {}", gettingItemDto);
         return gettingItemDto;
@@ -49,16 +48,13 @@ public class ItemController {
     @GetMapping
     public List<ItemDto> getAllItems(@RequestHeader(X_SHARER_USER_ID) int userId) {
         log.info("Получаем все вещи");
-        List<ItemDto> allItemsDto = itemService.getItems(userId);
-        return allItemsDto;
+        return itemService.getItems(userId);
     }
 
     @GetMapping("/search")
     public List<ItemDto> searchItems(@RequestHeader(X_SHARER_USER_ID) int userId,
                                      @RequestParam String text) {
         log.info("Поиск вещи по тексту {}", text);
-        List<ItemDto> searchItems = itemService.searchItems(userId, text);
-        log.info("Результат поиска {}", searchItems);
-        return searchItems;
+        return itemService.searchItems(userId, text);
     }
 }

@@ -8,7 +8,7 @@ public interface ItemService {
 
     ItemDto createItem(int userId, ItemDto itemDto);
 
-    ItemDto updateItem(int userId, int itemId, ItemDto itemDto);
+    ItemDto updateItem(int userId, ItemDto itemDto);
 
     ItemDto getItemById(int userId, int itemId);
 

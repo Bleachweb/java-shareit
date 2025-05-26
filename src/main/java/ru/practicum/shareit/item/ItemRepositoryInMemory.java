@@ -12,9 +12,11 @@ import java.util.Optional;
 public class ItemRepositoryInMemory implements ItemRepository {
 
     private final Map<Integer, Item> items = new HashMap<>();
+    private Integer itemId = 0;
 
     @Override
     public Item addItem(Item item) {
+        item.setId(getId());
         items.put(item.getId(), item);
         return item;
     }
@@ -43,5 +45,10 @@ public class ItemRepositoryInMemory implements ItemRepository {
                 .filter(item -> item.getName().toLowerCase().contains(text.toLowerCase())
                         || item.getDescription().toLowerCase().contains(text.toLowerCase()))
                 .toList();
+    }
+
+    private Integer getId() {
+        itemId++;
+        return itemId;
     }
 }

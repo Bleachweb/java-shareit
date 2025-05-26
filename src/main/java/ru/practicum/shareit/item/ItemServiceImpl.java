@@ -18,7 +18,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
 
-    private Integer itemId = 0;
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
 
@@ -28,9 +27,7 @@ public class ItemServiceImpl implements ItemService {
         userRepository.getUserById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
-        int id = getId();
         Item createdItem = ItemMapper.dtoToItem(itemDto);
-        createdItem.setId(id);
         createdItem.setOwnerId(userId);
 
         createdItem = itemRepository.addItem(createdItem);
@@ -39,16 +36,16 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto updateItem(int userId, int itemId, ItemDto itemDto) {
+    public ItemDto updateItem(int userId, ItemDto itemDto) {
 
         userRepository.getUserById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
-        Item oldItem = itemRepository.getItemById(itemId)
+        Item oldItem = itemRepository.getItemById(itemDto.getId())
                 .orElseThrow(() -> new NotFoundException("Вещь не найдена"));
 
         if (oldItem.getOwnerId() != userId) {
-            log.error("Пользователь с id {} не является владельцем вещи с id {}", userId, itemId);
+            log.error("Пользователь с id {} не является владельцем вещи с id {}", userId, itemDto.getId());
             throw new ValidationException("Пользователь не является владельцем вещи");
         }
         if (itemDto.getName() == null || itemDto.getName().isEmpty()) {
@@ -61,7 +58,7 @@ public class ItemServiceImpl implements ItemService {
             itemDto.setAvailable(false);
         }
 
-        itemDto.setId(itemId);
+        itemDto.setId(itemDto.getId());
         itemDto.setOwnerId(userId);
 
         Item updatedItem = itemRepository.updateItem(ItemMapper.dtoToItem(itemDto));
@@ -86,10 +83,5 @@ public class ItemServiceImpl implements ItemService {
             return new ArrayList<>();
         }
         return ItemMapper.itemsToDto(itemRepository.searchItems(userId, text));
-    }
-
-    private Integer getId() {
-        itemId++;
-        return itemId;
     }
 }
