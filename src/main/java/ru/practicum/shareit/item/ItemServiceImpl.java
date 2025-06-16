@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.dto.BookingDtoForItem;
 import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.comment.*;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -15,10 +16,7 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -89,22 +87,47 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> getItems(int userId) {
         User user = getUser(userId);
+
         List<Item> items = itemRepository.findAllItemsByUserOrderByIdAsc(user);
+
+        List<Booking> bookings = bookingRepository.findAllBookingsByOwnerWithItemsAndBookers(userId);
+        List<Comment> comments = commentRepository.findAllCommentsByOwnerWithItemsAndAuthors(userId);
+
+        Map<Integer, List<Booking>> bookingsByItem = bookings.stream()
+                .collect(Collectors.groupingBy(b -> b.getItem().getId()));
+
+        Map<Integer, List<Comment>> commentsByItem = comments.stream()
+                .collect(Collectors.groupingBy(c -> c.getItem().getId()));
+
         List<ItemDto> itemsDto = new ArrayList<>();
 
         for (Item item : items) {
             ItemDtoResponse itemResponse = itemMapper.itemToDtoResponse(item);
-            List<CommentDtoResponse> commentResponses = commentRepository.getAllCommentsByItemId(item.getId())
+
+            List<CommentDtoResponse> commentResponses = commentsByItem.getOrDefault(item.getId(), Collections.emptyList())
                     .stream()
                     .map(commentMapper::commentToDtoResponse)
                     .toList();
 
-            Booking nextBooking = getNextBooking(userId);
-            Booking lastBooking = getLastBooking(userId);
+            List<Booking> itemBookings = bookingsByItem.getOrDefault(item.getId(), Collections.emptyList());
+
+            Booking nextBooking = itemBookings.stream()
+                    .filter(b -> b.getStart().isAfter(LocalDateTime.now()))
+                    .min(Comparator.comparing(Booking::getStart))
+                    .orElse(null);
+
+            Booking lastBooking = itemBookings.stream()
+                    .filter(b -> b.getEnd().isBefore(LocalDateTime.now()))
+                    .max(Comparator.comparing(Booking::getEnd))
+                    .orElse(null);
+
+            BookingDtoForItem nextBookingDto = nextBooking != null ?
+                    bookingMapper.toItemBookingDto(nextBooking) : null;
+            BookingDtoForItem lastBookingDto = lastBooking != null ?
+                    bookingMapper.toItemBookingDto(lastBooking) : null;
 
             ItemDto itemDto = itemMapper.toItemDto(userId, itemResponse, commentResponses,
-                    bookingMapper.toItemBookingDto(nextBooking),
-                    bookingMapper.toItemBookingDto(lastBooking));
+                    nextBookingDto, lastBookingDto);
             itemsDto.add(itemDto);
         }
         return itemsDto;
@@ -140,7 +163,7 @@ public class ItemServiceImpl implements ItemService {
         Booking booking = bookings.getFirst();
 
         if (booking.getBooker().getId() != userId || booking.getEnd().isAfter(LocalDateTime.now())) {
-            log.warn("Пользователь с id {} не бронировал вещь с id {} или срок бронирования не истек",userId, itemId);
+            log.warn("Пользователь с id {} не бронировал вещь с id {} или срок бронирования не истек", userId, itemId);
             throw new ValidationException("Пользователь с id: " + userId +
                     " не бронировал вещь с id: " + itemId +
                     " или срок бронирования не истек");

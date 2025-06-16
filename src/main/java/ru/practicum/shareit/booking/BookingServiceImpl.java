@@ -98,7 +98,7 @@ public class BookingServiceImpl implements BookingService {
         int bookerId = booker.getId();
 
         if (ownerId != userId && bookerId != userId) {
-            log.warn("У {} и {} не найдена вещь {}",owner.getId(), booker.getId(), booking.getItem().getId());
+            log.warn("У {} и {} не найдена вещь {}", owner.getId(), booker.getId(), booking.getItem().getId());
             throw new NotFoundException("У '" + owner.getName() + "' и '" + booker.getName() +
                     "' не найден предмет: '" + booking.getItem().getName());
         }
@@ -112,32 +112,28 @@ public class BookingServiceImpl implements BookingService {
         getUser(bookerId);
         List<Booking> bookingDtoResponses;
 
+        log.info("Запрос бронирований пользователя (ID: {}). Статус: {}", bookerId, state);
+
         switch (state) {
             case ALL -> {
-                log.info("Запрос на получение всех бронирований пользователя с id: {}", bookerId);
                 bookingDtoResponses = bookingRepository.findAllBookingsByBookerIdOrderByStartDesc(bookerId);
             }
             case CURRENT -> {
-                log.info("Запрос на получение текущих бронирований пользователя с id: {}", bookerId);
                 bookingDtoResponses = bookingRepository.findAllCurrentBookingsByBookerId(bookerId, LocalDateTime.now());
             }
             case PAST -> {
-                log.info("Запрос на получение завершенных бронирований пользователя с id: {}", bookerId);
                 bookingDtoResponses = bookingRepository
                         .findAllBookingsByBookerIdAndEndBeforeOrderByStartDesc(bookerId, LocalDateTime.now());
             }
             case FUTURE -> {
-                log.info("Запрос на получение будущих бронирований пользователя с id: {}", bookerId);
                 bookingDtoResponses = bookingRepository
                         .findAllBookingsByBookerIdAndStartAfterOrderByStartDesc(bookerId, LocalDateTime.now());
             }
             case WAITING -> {
-                log.info("Запрос на получение бронирований пользователя с id: {}, ожидающих подтверждения", bookerId);
                 bookingDtoResponses = bookingRepository
                         .findAllBookingsByBookerIdAndStatusOrderByStartDesc(bookerId, BookingStatus.WAITING);
             }
             case REJECTED -> {
-                log.info("Запрос на получение отклоненных бронирований пользователя с id: {}", bookerId);
                 bookingDtoResponses = bookingRepository
                         .findAllBookingsByBookerIdAndStatusOrderByStartDesc(bookerId, BookingStatus.REJECTED);
             }
@@ -160,33 +156,29 @@ public class BookingServiceImpl implements BookingService {
                 .collect(Collectors.toSet());
         List<Booking> bookingDtoResponses;
 
+        log.info("Запрос бронирований владельца (ID: {}). Статус: {}", ownerId, state);
+
         switch (state) {
             case ALL -> {
-                log.info("Запрос на получение всех бронирований владельцем с id: {}", ownerId);
                 bookingDtoResponses = bookingRepository.findAllBookingsByItemIdInOrderByStartDesc(itemIds);
             }
             case CURRENT -> {
-                log.info("Запрос на получение текущих бронирований владельцем с id: {}", ownerId);
                 bookingDtoResponses = bookingRepository.findAllCurrentBookingsByOwnerId(ownerId, LocalDateTime.now());
             }
             case PAST -> {
-                log.info("Запрос на получение завершенных бронирований владельцем с id: {}", ownerId);
                 bookingDtoResponses = bookingRepository
                         .findAllBookingsByItemUserIdAndEndBeforeOrderByStartDesc(ownerId, LocalDateTime.now());
             }
             case FUTURE -> {
-                log.info("Запрос на получение будущих бронирований владельцем с id: {}", ownerId);
                 bookingDtoResponses = bookingRepository
                         .findAllBookingsByItemUserIdAndStartAfterOrderByStartDesc(ownerId, LocalDateTime.now());
             }
             case WAITING -> {
-                log.info("Запрос на получение бронирований владельцем с id: {}, ожидающих подтверждение", ownerId);
                 bookingDtoResponses = bookingRepository
                         .findAllBookingsByItemUserIdAndStatusOrderByStartDesc(ownerId, BookingStatus.WAITING);
 
             }
             case REJECTED -> {
-                log.info("Запрос на получение отклоненных бронирований владельцем с id: {}", ownerId);
                 bookingDtoResponses = bookingRepository
                         .findAllBookingsByItemUserIdAndStatusOrderByStartDesc(ownerId, BookingStatus.REJECTED);
             }

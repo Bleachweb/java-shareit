@@ -19,4 +19,13 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
                  OR i.description ILIKE %:text%)
             """)
     List<Item> search(String text);
+
+    @Query("""
+            SELECT i
+            FROM Item AS i
+            LEFT JOIN FETCH i.user
+            WHERE i.user.id = :userId
+            ORDER BY i.id ASC
+            """)
+    List<Item> findAllByUserIdWithOwner(int userId);
 }

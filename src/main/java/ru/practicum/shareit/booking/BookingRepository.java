@@ -56,4 +56,13 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     // WAITING.
     // REJECTED.
     List<Booking> findAllBookingsByItemUserIdAndStatusOrderByStartDesc(int ownerId, BookingStatus status);
+
+    @Query("""
+            SELECT b
+            FROM Booking b
+            JOIN FETCH b.item
+            JOIN FETCH b.booker
+            WHERE b.item.user.id = :ownerId
+            """)
+    List<Booking> findAllBookingsByOwnerWithItemsAndBookers(int ownerId);
 }

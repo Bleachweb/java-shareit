@@ -33,17 +33,10 @@ public class BookingController {
     public BookingDtoResponse approvedBooking(@RequestHeader(X_SHARER_USER_ID) int userId,
                                               @PathVariable int bookingId,
                                               @RequestParam boolean approved) {
-        if (approved) {
-            log.info("Подтверждение бронирования предмета владельцем: {}", userId);
-        } else {
-            log.info("Отклонение бронирования предмета владельцем: {}", userId);
-        }
+
         BookingDtoResponse bookingResponse = bookingService.approvedBooking(userId, bookingId, approved);
-        if (approved) {
-            log.info("Бронирование: {} - подтверждено", bookingResponse);
-        } else {
-            log.info("Бронирование: {} - отклонено", bookingResponse);
-        }
+
+        log.info("Бронирование: {} - {}", bookingResponse, approved ? "подтверждено" : "отклонено");
         return bookingResponse;
     }
 
@@ -58,18 +51,17 @@ public class BookingController {
     @GetMapping
     public List<BookingDtoResponse> getBookingsByBooker(@RequestHeader(X_SHARER_USER_ID) int userId,
                                                         @RequestParam(defaultValue = "ALL") State state) {
-        log.info("Получение списка всех бронирований текущего пользователя c id: {}, со статусом - {}.", userId, state);
         List<BookingDtoResponse> bookingResponses = bookingService.getBookingsByBooker(userId, state);
-        log.info("Получен список всех бронирований: {}", bookingResponses);
+        log.info("Получен список всех бронирований пользователя c id: {}, со статусом - {} : {}",
+                userId, state, bookingResponses);
         return bookingResponses;
     }
 
     @GetMapping("/owner")
     public List<BookingDtoResponse> getBookingsByOwner(@RequestHeader(X_SHARER_USER_ID) int userId,
                                                        @RequestParam(defaultValue = "ALL") State state) {
-        log.info("Получение списка бронирований пользователя c id: {}, со статусом - {}.", userId, state);
         List<BookingDtoResponse> bookingResponses = bookingService.getBookingsByOwner(userId, state);
-        log.info("Получен список бронирований: {}", bookingResponses);
+        log.info("Получен список бронирований владельца c id: {}, со статусом - {}: {}", userId, state, bookingResponses);
         return bookingResponses;
     }
 }
