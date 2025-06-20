@@ -14,21 +14,35 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(final NotFoundException e) {
-        log.warn("Объект не найден: {}", e.getMessage());
+        log.error(e.getMessage());
         return new ErrorResponse("Объект не найден", e.getMessage());
     }
 
     @ExceptionHandler({ValidationException.class, MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationException(final Exception e) {
-        log.warn("Ошибка валидации: {}", e.getMessage());
+        log.error(e.getMessage());
         return new ErrorResponse("Ошибка валидации", e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleException(final Exception e) {
-        log.error("Неизвестная ошибка: {}", e.getMessage());
+        log.error(e.getMessage());
         return new ErrorResponse("Неизвестная ошибка", e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleDataDuplicationException(final DataDuplicationException e) {
+        log.error(e.getMessage());
+        return new ErrorResponse("Ошибка: ", e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleUnknownStateException(final UnknownStateException e) {
+        log.error(e.getMessage());
+        return new ErrorResponse(e.getMessage(), e.getMessage());
     }
 }
