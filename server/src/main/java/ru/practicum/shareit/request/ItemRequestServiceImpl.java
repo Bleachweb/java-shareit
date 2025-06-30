@@ -7,11 +7,13 @@ import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.dto.ItemDtoResponse;
 import ru.practicum.shareit.item.dto.ItemMapper;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -48,16 +50,28 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public List<ItemRequestDto> getAllRequestByUserId(int userId) {
-        List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequesterId(userId);
-        List<ItemDtoResponse> items = itemRequests.stream()
-                .map(request -> itemRepository.findAllItemsByItemRequestIdOrderByIdAsc(request.getId())
-                        .stream()
-                        .map(itemMapper::itemToDtoResponse)
-                        .collect(Collectors.toList()))
-                .flatMap(Collection::stream)
+        List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequesterIdWithUser(userId);
+        if (itemRequests.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Integer> requestIds = itemRequests.stream()
+                .map(ItemRequest::getId)
                 .collect(Collectors.toList());
 
-        return mapper.requestsToDto(itemRequests, items);
+        List<Item> items = itemRepository.findAllByRequestIdIn(requestIds);
+
+        Map<Integer, List<ItemDtoResponse>> itemsByRequestId = items.stream()
+                .map(itemMapper::itemToDtoResponse)
+                .collect(Collectors.groupingBy(ItemDtoResponse::getRequestId));
+
+        return itemRequests.stream()
+                .map(request -> {
+                    List<ItemDtoResponse> itemsForRequest =
+                            itemsByRequestId.getOrDefault(request.getId(), Collections.emptyList());
+                    return mapper.toDto(request, itemsForRequest);
+                })
+                .collect(Collectors.toList());
     }
 
     @Override

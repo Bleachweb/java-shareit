@@ -9,8 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.shareit.BaseClient;
 
-import java.util.Map;
-
 @Service
 public class BookingClient extends BaseClient {
     private static final String API_PREFIX = "/bookings";
@@ -38,20 +36,12 @@ public class BookingClient extends BaseClient {
     }
 
     public ResponseEntity<Object> getBookings(long userId, BookingState state, Integer from, Integer size) {
-        Map<String, Object> parameters = Map.of(
-                "state", state.name(),
-                "from", from,
-                "size", size
-        );
-        return get("?state={state}&from={from}&size={size}", userId, parameters);
+        BookingRequestParams params = new BookingRequestParams(state.name(), from, size);
+        return get("?state={state}&from={from}&size={size}", userId, params.toMap());
     }
 
     public ResponseEntity<Object> getBookingsByOwner(long userId, BookingState state, Integer from, Integer size) {
-        Map<String, Object> parameters = Map.of(
-                "state", state.name(),
-                "from", from,
-                "size", size
-        );
-        return get("/owner?state={state}&from={from}&size={size}", userId, parameters);
+        BookingRequestParams params = new BookingRequestParams(state.name(), from, size);
+        return get("/owner?state={state}&from={from}&size={size}", userId, params.toMap());
     }
 }
